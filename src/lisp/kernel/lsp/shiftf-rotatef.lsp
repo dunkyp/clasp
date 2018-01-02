@@ -115,7 +115,7 @@
   (let* ((setf-expansions
 	   ;; Collect the SETF-EXPANSION of each place as a list of the
 	   ;; values returned by GET-SETF-EXPANSION. 
-	   (loop for place in places
+	   (loop for place in (reverse places)
 		 collect (multiple-value-list
 			  (get-setf-expansion place environment))))
 	 (result
@@ -130,16 +130,17 @@
 		   ;; result.
 		   nil)))
     (loop for right-hand-side
-	    in (reverse (append (rest setf-expansions)
-				(list (first setf-expansions))))
+	    in (append (rest setf-expansions)
+				(list (first setf-expansions)))
 	  for store-variables = (third right-hand-side)
 	  for (temporary-variables
 	       value-forms
 	       nil
 	       nil
 	       accessing-form)
-	    in (reverse setf-expansions)
-	  do (setf result
+	    in setf-expansions
+	  do 
+         (setf result
 		   `(let* ,(loop for var in temporary-variables
 				 for form in value-forms
 				 collect `(,var ,form))
